@@ -58,7 +58,7 @@ RainDetector requires an API key from [OpenWeather](https://openweathermap.org/a
 
 ```python
 openWeatherAPIKey = 'YOUR_API_KEY_HERE'
-
+```
 ## License
 
 MIT License © 2025 Caleb Daze

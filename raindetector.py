@@ -15,36 +15,41 @@ locationData = LocationRequest.json()
 lat = locationData['latitude']
 long = locationData['longitude']
 
-#FUNction to send the notification
-def noti():
+#FUNction to send the notification, made the message customize
+def noti(message):
     notification.notify(
         title="Rain is coming!",
-        message="Rain is expected to come within the next hour!",
+        message=message,
         timeout=5  # seconds
     )
 
 #All the openWeather API stuff
-openWeatherAPIKey = 'openWeatherAPIKey'
+openWeatherAPIKey = 'YOUR_API_KEY_HERE'
 weatherURL = (
     f"https://api.openweathermap.org/data/3.0/onecall?"
     f"lat={lat}&lon={long}&exclude=current,minutely,daily,alerts&units=metric&appid={openWeatherAPIKey}"
 )
 
+#I had to redo cause I didn't read the doc :(
 def weatherLoop():
     while True:
         print("El stupido 1")
         weatherRequest = requests.get(weatherURL)
         weatherData = weatherRequest.json()
-        #Check hourly forecasts for rain
-        for hour in weatherData['hourly'][:1]:  #next 2 hours
+        print(weatherData)
+        for hour in weatherData['hourly'][:2]:  # Next 2 hours
             print("El Stupido 2")
-            if 'rain' in hour:
-                noti()
+            rain = hour.get('rain', {}).get('1h', 0)
+            pop = hour.get('pop', 0)
+            if rain > 0:
+                noti(f"Rain expected soon (~{rain} mm)!")
+                break #The break helps with spam, Source: My ear drums
+            elif pop >= 0.6:
+                noti(f"{int(pop*100)}% chance of rain in the next hour.")
+                break
             else:
-                print("Will check in a hour")
-        time.sleep(1800)
-
-
+                print("No rain. Will check again in 30 mins.")
+        time.sleep(1800)  # Wait 30 mins
 #To whoever made threads I love you but PLEASEEEEEE make the documentation easier to understand geeksforgeeks is the goat
 weatherThread = threading.Thread(target=weatherLoop,daemon=True)
 weatherThread.start()
